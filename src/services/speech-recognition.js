@@ -133,8 +133,9 @@ class SpeechRecognitionService {
   /** Handle errors */
   _handleError(event) {
     console.warn('Speech recognition error:', event.error);
-    if (event.error === 'not-allowed') {
-      this.onError?.('Microphone access denied. Please allow microphone access.');
+    if (event.error === 'not-allowed' || event.error === 'audio-capture') {
+      this.isListening = false;
+      this.onError?.('Microphone access denied or not found. You can use text chat.');
     } else if (event.error === 'no-speech') {
       // Silently restart
       if (this.isListening) {
@@ -157,13 +158,15 @@ class SpeechRecognitionService {
   /** Restart recognition */
   _restart() {
     if (!this.isListening) return;
-    try {
-      setTimeout(() => {
-        if (this.isListening && this.recognition) {
+    setTimeout(() => {
+      if (this.isListening && this.recognition) {
+        try {
           this.recognition.start();
+        } catch (e) {
+          // Ignore InvalidStateError (already started)
         }
-      }, 100);
-    } catch { /* ignore */ }
+      }
+    }, 250);
   }
 
   /** Get speaking statistics */

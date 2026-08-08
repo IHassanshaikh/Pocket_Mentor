@@ -42,7 +42,23 @@ class GeminiService {
   /** Send a message and get AI response */
   async sendMessage(userText) {
     if (!this.isReady()) {
-      throw new Error('Gemini API key not configured');
+      console.warn('API key not configured. Using Demo Mode fallback.');
+      
+      this.addToHistory('user', userText);
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const demoResponses = [
+        "That's a great point! I'm currently running in Demo Mode since an API key isn't configured, but your audio and layout seem to be working perfectly.",
+        "I hear you loud and clear. As your Pocket Mentor in Demo Mode, I think you're doing a fantastic job testing the interface.",
+        "Excellent communication! You can add a Gemini API key in the settings to unlock my full conversational abilities.",
+        "I completely agree. This demo voice lets you test the Text-to-Speech system and verify everything runs smoothly on your device."
+      ];
+      
+      const aiText = demoResponses[Math.floor(Math.random() * demoResponses.length)];
+      this.addToHistory('model', aiText);
+      return aiText;
     }
 
     this.addToHistory('user', userText);
@@ -98,7 +114,29 @@ class GeminiService {
   /** Send a message with streaming (returns async generator) */
   async *sendMessageStream(userText) {
     if (!this.isReady()) {
-      throw new Error('Gemini API key not configured');
+      console.warn('API key not configured. Using Demo Mode fallback.');
+      this.addToHistory('user', userText);
+      
+      const demoResponses = [
+        "That's a great point! I'm currently running in Demo Mode since an API key isn't configured, but your audio and layout seem to be working perfectly.",
+        "I hear you loud and clear. As your Pocket Mentor in Demo Mode, I think you're doing a fantastic job testing the interface.",
+        "Excellent communication! You can add a Gemini API key in the settings to unlock my full conversational abilities.",
+        "I completely agree. This demo voice lets you test the Text-to-Speech system and verify everything runs smoothly on your device."
+      ];
+      
+      const aiText = demoResponses[Math.floor(Math.random() * demoResponses.length)];
+      
+      // Simulate streaming
+      const words = aiText.split(' ');
+      let fullText = '';
+      for (const word of words) {
+        await new Promise(resolve => setTimeout(resolve, 150));
+        fullText += word + ' ';
+        yield word + ' ';
+      }
+      
+      this.addToHistory('model', fullText.trim());
+      return;
     }
 
     this.addToHistory('user', userText);
