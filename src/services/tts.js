@@ -10,6 +10,7 @@ class TTSService {
     this.voice = null;
     this.isSpeaking = false;
     this.queue = [];
+    this.activeUtterances = []; // Keep references to prevent garbage collection
     this.onStart = null;
     this.onEnd = null;
     this.onWord = null;
@@ -23,6 +24,7 @@ class TTSService {
   unlock() {
     if (!this.synth) return;
     try {
+      this.synth.cancel(); // Cancel any stuck state
       const silentUtterance = new SpeechSynthesisUtterance('');
       silentUtterance.volume = 0;
       this.synth.speak(silentUtterance);
@@ -111,6 +113,8 @@ class TTSService {
     // Cancel any current speech
     this.stop();
 
+    this.activeUtterances = [];
+
     // Split into sentences for more natural delivery
     const sentences = this._splitIntoSentences(text);
 
@@ -122,6 +126,9 @@ class TTSService {
       utterance.volume = this.volume;
       utterance.lang = 'en-US';
 
+      // Store reference to prevent garbage collection
+      this.activeUtterances.push(utterance);
+
       if (index === 0) {
         utterance.onstart = () => {
           this.isSpeaking = true;
@@ -132,6 +139,7 @@ class TTSService {
       if (index === sentences.length - 1) {
         utterance.onend = () => {
           this.isSpeaking = false;
+          this.activeUtterances = [];
           this.onEnd?.();
         };
       }
@@ -141,6 +149,7 @@ class TTSService {
           console.warn('TTS error:', e.error);
         }
         this.isSpeaking = false;
+        this.activeUtterances = [];
         this.onEnd?.();
       };
 
@@ -159,6 +168,7 @@ class TTSService {
     if (this.synth) {
       this.synth.cancel();
       this.isSpeaking = false;
+      this.activeUtterances = [];
     }
   }
 
