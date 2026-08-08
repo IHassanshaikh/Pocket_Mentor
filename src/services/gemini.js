@@ -5,7 +5,7 @@
 import { LS_KEYS } from '../utils/constants.js';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
-const MODEL = 'gemini-2.0-flash';
+const MODEL = 'gemini-3.5-flash';
 
 class GeminiService {
   constructor() {

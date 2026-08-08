@@ -271,6 +271,10 @@ async function initSession(personality, mode, profile, onEndCall) {
       userName: profile.name,
     });
 
+    // Provide context to the API so it knows what it just said
+    geminiService.addToHistory('user', "Hi, let's start the session.");
+    geminiService.addToHistory('model', greeting);
+
     addTranscriptMessage('ai', greeting);
     sessionStore.addMessage('ai', greeting);
     showCaptions(greeting);
@@ -374,7 +378,7 @@ async function handleUserSpeech(text) {
     }
   } catch (err) {
     console.error('AI response error:', err);
-    showToast('Connection issue. Trying again...', 'warning');
+    showToast(`Connection issue: ${err.message}`, 'warning');
   }
 
   isProcessing = false;
