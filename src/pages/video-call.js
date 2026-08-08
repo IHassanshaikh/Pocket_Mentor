@@ -124,6 +124,7 @@ export function renderVideoCall(app, onEndCall) {
             <video id="self-video" autoplay muted playsinline style="display:none;"></video>
             <div class="pip-label">${profile.name}</div>
             <div class="pip-mic-indicator" id="pip-mic" style="display: flex; align-items: center; justify-content: center; color: white;">${ICONS.mic}</div>
+            <div class="user-voice-line" id="user-voice-line" style="position: absolute; bottom: 0; left: 0; height: 4px; background: var(--accent-primary); width: 0%; transition: width 0.1s ease; z-index: 10;"></div>
           </div>
         </div>
 
@@ -495,7 +496,9 @@ function startTimer() {
 
 function startWaveformAnimation() {
   const bars = document.querySelectorAll('#waveform .waveform-bar');
+  const userVoiceLine = document.getElementById('user-voice-line');
   waveformInterval = setInterval(() => {
+    // AI waveform
     if (ttsService.isSpeaking) {
       bars.forEach(bar => {
         const h = Math.random() * 35 + 4;
@@ -506,6 +509,19 @@ function startWaveformAnimation() {
       bars.forEach(bar => {
         bar.style.height = '4px';
       });
+    }
+    
+    // User voice line animation
+    if (userVoiceLine) {
+      const userVol = audioAnalyzer.getVolume();
+      const widthPct = Math.min(100, userVol * 1000);
+      userVoiceLine.style.width = `${widthPct}%`;
+      
+      if (widthPct > 5) {
+        userVoiceLine.style.boxShadow = `0 0 ${widthPct / 5}px var(--accent-primary)`;
+      } else {
+        userVoiceLine.style.boxShadow = 'none';
+      }
     }
   }, 100);
 }
