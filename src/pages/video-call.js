@@ -11,6 +11,7 @@ import { ttsService } from '../services/tts.js';
 import { audioAnalyzer } from '../services/audio-analyzer.js';
 import { sessionStore } from '../stores/session-store.js';
 import { userStore } from '../stores/user-store.js';
+import { ICONS } from '../utils/icons.js';
 
 let timerInterval = null;
 let waveformInterval = null;
@@ -37,16 +38,18 @@ export function renderVideoCall(app, onEndCall) {
             <div class="status-dot" id="status-dot"></div>
           </div>
           <span class="call-info-name">${personality.name} — ${personality.role}</span>
-          <span class="call-info-mode">${mode.icon} ${mode.name}</span>
+          <span class="call-info-mode" style="display: flex; align-items: center; gap: 4px;">
+            ${ICONS[mode.icon] || ''} ${mode.name}
+          </span>
         </div>
         <div style="display: flex; align-items: center; gap: var(--space-4);">
           <span class="meeting-timer" id="meeting-timer">00:00</span>
           <div class="call-top-actions">
-            <button class="top-action-btn" id="captions-toggle-btn" title="Toggle captions">
-              CC
+            <button class="top-action-btn" id="captions-toggle-btn" title="Toggle captions" style="display: inline-flex; align-items: center; justify-content: center;">
+              ${ICONS.captions}
             </button>
-            <button class="top-action-btn" id="metrics-toggle-btn" title="Toggle metrics">
-              📊
+            <button class="top-action-btn" id="metrics-toggle-btn" title="Toggle metrics" style="display: inline-flex; align-items: center; justify-content: center;">
+              ${ICONS.metrics}
             </button>
           </div>
         </div>
@@ -80,9 +83,9 @@ export function renderVideoCall(app, onEndCall) {
           <div class="ai-video-container">
             <div class="ai-video-bg"></div>
             <div class="ai-avatar-area">
-              <div class="ai-avatar" id="ai-avatar">
+              <div class="ai-avatar" id="ai-avatar" style="color: white;">
                 <div class="ai-avatar-ring"></div>
-                ${personality.icon}
+                ${ICONS[personality.icon] || ''}
               </div>
               <div class="waveform-container" id="waveform">
                 ${Array(24).fill('').map(() => '<div class="waveform-bar"></div>').join('')}
@@ -100,13 +103,15 @@ export function renderVideoCall(app, onEndCall) {
 
           <!-- Captions Overlay -->
           <div class="captions-overlay" id="captions-overlay">
-            <div class="captions-text" id="captions-text" style="display:none;"></div>
+            <div class="captions-text" id="captions-text" style="display:none; color: var(--text-primary);"></div>
           </div>
 
           <!-- Live Suggestions -->
           <div class="live-suggestions" id="live-suggestions" style="display:none;">
             <div class="suggestion-popup">
-              <div class="suggestion-label">💡 Suggestion</div>
+              <div class="suggestion-label" style="display: flex; align-items: center; gap: var(--space-2);">
+                <span style="display: inline-flex;">${ICONS.logo}</span> Suggestion
+              </div>
               <div class="suggestion-text" id="suggestion-text"></div>
             </div>
           </div>
@@ -114,22 +119,24 @@ export function renderVideoCall(app, onEndCall) {
           <!-- Self Video PIP -->
           <div class="self-video-pip" id="self-pip">
             <div class="pip-no-video" id="pip-no-video">
-              <div class="pip-avatar">👤</div>
+              <div class="pip-avatar" style="display: flex; align-items: center; justify-content: center; color: var(--accent-primary-light);">${ICONS.user}</div>
             </div>
             <video id="self-video" autoplay muted playsinline style="display:none;"></video>
             <div class="pip-label">${profile.name}</div>
-            <div class="pip-mic-indicator" id="pip-mic">🎤</div>
+            <div class="pip-mic-indicator" id="pip-mic" style="display: flex; align-items: center; justify-content: center; color: white;">${ICONS.mic}</div>
           </div>
         </div>
 
         <!-- Transcript Panel -->
         <div class="transcript-panel ${profile.transcriptOpen ? '' : 'collapsed'}" id="transcript-panel">
           <div class="transcript-header">
-            <h3>
-              📝 Transcript
+            <h3 style="display: flex; align-items: center; gap: var(--space-2);">
+              <span style="display: inline-flex;">${ICONS.transcript}</span> Transcript
               <span class="live-badge">LIVE</span>
             </h3>
-            <button class="top-action-btn" id="close-transcript-btn">✕</button>
+            <button class="top-action-btn" id="close-transcript-btn" style="display: inline-flex; align-items: center; justify-content: center;">
+              ${ICONS.close}
+            </button>
           </div>
           <div class="transcript-messages" id="transcript-messages">
             <!-- Messages will be added here -->
@@ -139,22 +146,22 @@ export function renderVideoCall(app, onEndCall) {
 
       <!-- Controls Bar -->
       <div class="call-controls-bar">
-        <button class="control-btn control-btn-bg" id="mic-btn" title="Toggle Microphone">
-          🎤
+        <button class="control-btn control-btn-bg" id="mic-btn" title="Toggle Microphone" style="display: inline-flex; align-items: center; justify-content: center;">
+          ${ICONS.mic}
           <span class="tooltip">Mute</span>
         </button>
-        <button class="control-btn control-btn-bg" id="camera-btn" title="Toggle Camera">
-          📷
+        <button class="control-btn control-btn-bg" id="camera-btn" title="Toggle Camera" style="display: inline-flex; align-items: center; justify-content: center;">
+          ${ICONS.camera}
           <span class="tooltip">Camera</span>
         </button>
         <div class="controls-divider"></div>
-        <button class="control-btn control-btn-bg" id="transcript-btn" title="Toggle Transcript">
-          📝
+        <button class="control-btn control-btn-bg" id="transcript-btn" title="Toggle Transcript" style="display: inline-flex; align-items: center; justify-content: center;">
+          ${ICONS.transcript}
           <span class="tooltip">Transcript</span>
         </button>
         <div class="controls-divider"></div>
-        <button class="control-btn control-btn-end" id="end-call-btn" title="End Call">
-          📞
+        <button class="control-btn control-btn-end" id="end-call-btn" title="End Call" style="display: inline-flex; align-items: center; justify-content: center; color: white;">
+          ${ICONS.phoneOff}
           <span class="tooltip">End Call</span>
         </button>
       </div>
@@ -279,13 +286,11 @@ function setupControls(onEndCall) {
     if (sessionStore.isMuted) {
       speechService.stop();
       btn.classList.add('active');
-      btn.querySelector('.tooltip').textContent = 'Unmute';
-      btn.innerHTML = '🔇<span class="tooltip">Unmute</span>';
+      btn.innerHTML = `${ICONS.micOff}<span class="tooltip">Unmute</span>`;
     } else {
       speechService.start();
       btn.classList.remove('active');
-      btn.querySelector('.tooltip').textContent = 'Mute';
-      btn.innerHTML = '🎤<span class="tooltip">Mute</span>';
+      btn.innerHTML = `${ICONS.mic}<span class="tooltip">Mute</span>`;
     }
   });
 
@@ -303,6 +308,7 @@ function setupControls(onEndCall) {
         video.style.display = 'block';
         noVideo.style.display = 'none';
         btn.classList.remove('active');
+        btn.innerHTML = `${ICONS.camera}<span class="tooltip">Camera</span>`;
       } catch {
         showToast('Could not access camera', 'warning');
         sessionStore.isCameraOn = false;
@@ -315,6 +321,7 @@ function setupControls(onEndCall) {
       video.style.display = 'none';
       noVideo.style.display = 'flex';
       btn.classList.add('active');
+      btn.innerHTML = `${ICONS.cameraOff}<span class="tooltip">Camera</span>`;
     }
   });
 
@@ -380,13 +387,13 @@ function addTranscriptMessage(role, text) {
   const personality = Object.values(PERSONALITIES).find(p => p.id === userStore.get('personality'));
   const isAI = role === 'ai';
   const name = isAI ? (personality?.name?.split(' ')[0] || 'AI') : userStore.get('name');
-  const icon = isAI ? (personality?.icon || '🤖') : '👤';
+  const icon = isAI ? (ICONS[personality?.icon] || '') : ICONS.user;
   const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   const msgEl = document.createElement('div');
   msgEl.className = 'transcript-msg';
   msgEl.innerHTML = `
-    <div class="transcript-msg-avatar ${role}">${icon}</div>
+    <div class="transcript-msg-avatar ${role}" style="display: flex; align-items: center; justify-content: center;">${icon}</div>
     <div class="transcript-msg-content">
       <div class="transcript-msg-name">${name}</div>
       <div class="transcript-msg-text">${highlightFillers(text)}</div>
@@ -417,7 +424,7 @@ function showInterimText(text) {
     interim.id = 'interim-text';
     interim.className = 'transcript-msg interim';
     interim.innerHTML = `
-      <div class="transcript-msg-avatar user">👤</div>
+      <div class="transcript-msg-avatar user" style="display: flex; align-items: center; justify-content: center;">${ICONS.user}</div>
       <div class="transcript-msg-content">
         <div class="transcript-msg-name">${userStore.get('name')}</div>
         <div class="transcript-msg-text"></div>

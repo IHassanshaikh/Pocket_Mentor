@@ -5,15 +5,19 @@
 import { userStore } from '../stores/user-store.js';
 import { progressStore } from '../stores/progress-store.js';
 import { ttsService } from '../services/tts.js';
+import { ICONS } from '../utils/icons.js';
 
 export function renderSettings(app, onStartSession) {
   const profile = userStore.profile;
   const apiKey = userStore.getApiKey();
+  const voices = ttsService.getVoices();
+  const currentVoiceName = ttsService.voice?.name || '';
+  const voicesOptions = voices.map(v => `<option value="${v.name}" ${v.name === currentVoiceName ? 'selected' : ''}>${v.name}</option>`).join('');
 
   app.innerHTML = `
     <nav class="nav-bar">
       <div class="nav-brand">
-        <div class="nav-brand-icon">🎙️</div>
+        <div class="nav-brand-icon">${ICONS.logo}</div>
         <span>Pocket <span class="text-gradient">Mentor</span></span>
       </div>
       <div class="nav-links">
@@ -24,13 +28,15 @@ export function renderSettings(app, onStartSession) {
     </nav>
 
     <div class="settings-page">
-      <h1 style="font-size: var(--text-3xl); font-weight: 800; margin-bottom: var(--space-8);">
-        ⚙️ <span class="text-gradient">Settings</span>
+      <h1 style="display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-3xl); font-weight: 800; margin-bottom: var(--space-8);">
+        <span style="color: var(--accent-primary-light); display: inline-flex;">${ICONS.settings}</span> <span class="text-gradient">Settings</span>
       </h1>
 
       <!-- Profile -->
       <div class="settings-section fade-in">
-        <h3>👤 Profile</h3>
+        <h3 style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); font-size: var(--text-lg); font-weight: 700;">
+          <span style="color: var(--accent-primary-light); display: inline-flex;">${ICONS.user}</span> Profile
+        </h3>
         <div class="setting-row">
           <label>Your Name</label>
           <input type="text" id="setting-name" value="${profile.name}" style="width: 200px;" />
@@ -47,7 +53,9 @@ export function renderSettings(app, onStartSession) {
 
       <!-- API Keys -->
       <div class="settings-section fade-in" style="animation-delay: 0.1s">
-        <h3>🔑 API Configuration</h3>
+        <h3 style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); font-size: var(--text-lg); font-weight: 700;">
+          <span style="color: var(--accent-primary-light); display: inline-flex;">${ICONS.settings}</span> API Configuration
+        </h3>
         <div class="setting-row">
           <label>Gemini API Key</label>
           <div style="display: flex; gap: var(--space-2); align-items: center;">
@@ -65,23 +73,35 @@ export function renderSettings(app, onStartSession) {
 
       <!-- Voice Settings -->
       <div class="settings-section fade-in" style="animation-delay: 0.2s">
-        <h3>🔊 Voice Settings</h3>
+        <h3 style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); font-size: var(--text-lg); font-weight: 700;">
+          <span style="color: var(--accent-primary-light); display: inline-flex;">${ICONS.speaker}</span> Voice Settings
+        </h3>
+        <div class="setting-row">
+          <label>Preferred Voice</label>
+          <select id="setting-voice" style="width: 280px; max-width: 100%;">
+            ${voicesOptions || '<option value="">No English voices found</option>'}
+          </select>
+        </div>
         <div class="setting-row">
           <label>Speaking Speed</label>
           <div style="display: flex; align-items: center; gap: var(--space-3);">
-            <input type="range" id="setting-rate" min="0.5" max="1.5" step="0.1" value="1.0" style="width: 120px;" />
-            <span id="rate-value" style="font-family: var(--font-mono); font-size: var(--text-sm);">1.0x</span>
+            <input type="range" id="setting-rate" min="0.5" max="1.5" step="0.1" value="${profile.rate || 1.05}" style="width: 120px;" />
+            <span id="rate-value" style="font-family: var(--font-mono); font-size: var(--text-sm);">${profile.rate || 1.05}x</span>
           </div>
         </div>
         <div class="setting-row">
           <label>Test Voice</label>
-          <button class="btn btn-secondary" id="test-voice-btn">🔊 Play Sample</button>
+          <button class="btn btn-secondary" id="test-voice-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+            ${ICONS.play} Play Sample
+          </button>
         </div>
       </div>
 
       <!-- Display Settings -->
       <div class="settings-section fade-in" style="animation-delay: 0.3s">
-        <h3>🖥️ Display</h3>
+        <h3 style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); font-size: var(--text-lg); font-weight: 700;">
+          <span style="color: var(--accent-primary-light); display: inline-flex;">${ICONS.dashboard}</span> Display
+        </h3>
         <div class="setting-row">
           <label>Show Live Captions</label>
           <div class="toggle ${profile.captionsEnabled ? 'active' : ''}" id="toggle-captions"></div>
@@ -98,7 +118,9 @@ export function renderSettings(app, onStartSession) {
 
       <!-- Data -->
       <div class="settings-section fade-in" style="animation-delay: 0.4s">
-        <h3>💾 Data</h3>
+        <h3 style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); font-size: var(--text-lg); font-weight: 700;">
+          <span style="color: var(--accent-primary-light); display: inline-flex;">${ICONS.dashboard}</span> Data
+        </h3>
         <div class="setting-row">
           <label>Total Sessions: ${progressStore.getTotalSessions()}</label>
         </div>
@@ -106,14 +128,20 @@ export function renderSettings(app, onStartSession) {
           <label>Total Practice Time: ${progressStore.getTotalMinutes()} minutes</label>
         </div>
         <div style="display: flex; gap: var(--space-3); margin-top: var(--space-4);">
-          <button class="btn btn-secondary" id="export-data-btn">📤 Export Data</button>
-          <button class="btn btn-danger" id="clear-data-btn">🗑️ Clear All Data</button>
+          <button class="btn btn-secondary" id="export-data-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+            ${ICONS.logo} Export Data
+          </button>
+          <button class="btn btn-danger" id="clear-data-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+            ${ICONS.close} Clear All Data
+          </button>
         </div>
       </div>
 
       <!-- Save Button -->
       <div style="display: flex; justify-content: center; padding: var(--space-6) 0;">
-        <button class="btn btn-primary btn-lg" id="save-settings-btn">💾 Save Settings</button>
+        <button class="btn btn-primary btn-lg" id="save-settings-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+          ${ICONS.check} Save Settings
+        </button>
       </div>
     </div>
   `;
@@ -127,6 +155,10 @@ export function renderSettings(app, onStartSession) {
     await ttsService.init();
     const rate = parseFloat(document.getElementById('setting-rate').value);
     ttsService.setRate(rate);
+    const voiceSelect = document.getElementById('setting-voice');
+    if (voiceSelect && voiceSelect.value) {
+      ttsService.setVoice(voiceSelect.value);
+    }
     ttsService.speak("Hey there! This is how I'll sound during our conversation. Pretty natural, right?");
   });
 
@@ -142,11 +174,19 @@ export function renderSettings(app, onStartSession) {
     const profession = document.getElementById('setting-profession').value.trim();
     const language = document.getElementById('setting-language').value.trim();
     const apiKey = document.getElementById('setting-api-key').value.trim();
+    const rate = parseFloat(document.getElementById('setting-rate').value);
+    const voiceSelect = document.getElementById('setting-voice');
 
     if (name) userStore.set('name', name);
     if (profession) userStore.set('profession', profession);
     if (language) userStore.set('nativeLanguage', language);
     if (apiKey) userStore.setApiKey(apiKey);
+    userStore.set('rate', rate);
+    ttsService.setRate(rate);
+
+    if (voiceSelect && voiceSelect.value) {
+      ttsService.setVoice(voiceSelect.value);
+    }
 
     userStore.set('captionsEnabled', document.getElementById('toggle-captions')?.classList.contains('active'));
     userStore.set('metricsEnabled', document.getElementById('toggle-metrics')?.classList.contains('active'));
@@ -154,10 +194,10 @@ export function renderSettings(app, onStartSession) {
 
     // Show success feedback
     const btn = document.getElementById('save-settings-btn');
-    btn.textContent = '✅ Saved!';
+    btn.innerHTML = `${ICONS.check} Saved!`;
     btn.style.background = 'var(--accent-success)';
     setTimeout(() => {
-      btn.textContent = '💾 Save Settings';
+      btn.innerHTML = `${ICONS.check} Save Settings`;
       btn.style.background = '';
     }, 2000);
   });

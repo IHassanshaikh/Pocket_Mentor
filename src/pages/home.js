@@ -6,6 +6,8 @@ import { MODES, PERSONALITIES, DIFFICULTY, AMBIENTS } from '../utils/constants.j
 import { userStore } from '../stores/user-store.js';
 import { progressStore } from '../stores/progress-store.js';
 import { formatTimeLong } from '../utils/formatters.js';
+import { ICONS } from '../utils/icons.js';
+import { ttsService } from '../services/tts.js';
 
 export function renderHome(app, onStartSession) {
   const profile = userStore.profile;
@@ -23,7 +25,7 @@ export function renderHome(app, onStartSession) {
     <!-- Nav Bar -->
     <nav class="nav-bar">
       <div class="nav-brand">
-        <div class="nav-brand-icon">🎙️</div>
+        <div class="nav-brand-icon">${ICONS.logo}</div>
         <span>Pocket <span class="text-gradient">Mentor</span></span>
       </div>
       <div class="nav-links">
@@ -47,10 +49,10 @@ export function renderHome(app, onStartSession) {
         </p>
         <div class="hero-cta">
           <button class="join-meeting-btn" id="quick-start-btn">
-            📹 Join Meeting
+            ${ICONS.camera} Join Meeting
           </button>
           <button class="btn btn-secondary btn-lg" id="customize-btn">
-            ⚙️ Customize Session
+            ${ICONS.settings} Customize Session
           </button>
         </div>
       </section>
@@ -67,7 +69,9 @@ export function renderHome(app, onStartSession) {
         </div>
         <div class="stat-item">
           <div class="stat-value text-gradient">${streak}</div>
-          <div class="stat-label">Day Streak 🔥</div>
+          <div class="stat-label" style="display: flex; align-items: center; gap: 4px; justify-content: center;">
+            Day Streak <span style="color: var(--accent-warning-light); display: inline-flex;">${ICONS.streak}</span>
+          </div>
         </div>
         <div class="stat-item">
           <div class="stat-value text-gradient">${avgFluency || '—'}%</div>
@@ -78,7 +82,7 @@ export function renderHome(app, onStartSession) {
       <!-- Daily Challenge -->
       <section class="daily-challenge fade-in" style="animation-delay: 0.15s">
         <div class="daily-challenge-content">
-          <div class="daily-challenge-icon">🎯</div>
+          <div class="daily-challenge-icon" style="color: white;">${ICONS.target}</div>
           <div class="daily-challenge-info">
             <h3>Today's Challenge</h3>
             <p>${getDailyChallenge()}</p>
@@ -94,10 +98,10 @@ export function renderHome(app, onStartSession) {
         </div>
         <div class="modes-grid">
           ${modesArray.map(mode => `
-            <div class="mode-card" data-mode="${mode.id}">
+            <div class="mode-card ${profile.mode === mode.id ? 'selected' : ''}" data-mode="${mode.id}" style="${profile.mode === mode.id ? `border-color: ${mode.color}; box-shadow: 0 0 12px ${mode.color}25` : ''}">
               <div class="mode-card-content">
                 <div class="mode-icon" style="background: ${mode.color}15; color: ${mode.color}">
-                  ${mode.icon}
+                  ${ICONS[mode.icon] || ''}
                 </div>
                 <h3>${mode.name}</h3>
                 <p>${mode.description}</p>
@@ -117,9 +121,9 @@ export function renderHome(app, onStartSession) {
         </div>
         <div class="personality-grid">
           ${personalitiesArray.map(p => `
-            <div class="personality-card ${profile.personality === p.id ? 'selected' : ''}" data-personality="${p.id}">
-              <div class="personality-avatar" style="background: ${p.color}20; color: ${p.color}">
-                ${p.icon}
+            <div class="personality-card ${profile.personality === p.id ? 'selected' : ''}" data-personality="${p.id}" style="${profile.personality === p.id ? `border-color: ${p.color}; background: ${p.color}08; box-shadow: 0 0 12px ${p.color}20` : ''}">
+              <div class="personality-avatar" style="background: ${p.color}15; color: ${p.color}">
+                ${ICONS[p.icon] || ''}
               </div>
               <h4>${p.name}</h4>
               <p>${p.role}</p>
@@ -151,7 +155,7 @@ export function renderHome(app, onStartSession) {
         <div class="ambient-selector">
           ${ambientsArray.map(a => `
             <button class="ambient-option ${profile.ambient === a.id ? 'selected' : ''}" data-ambient="${a.id}">
-              ${a.icon} ${a.name}
+              <span style="display: inline-flex; align-items: center;">${ICONS[a.icon] || ''}</span> ${a.name}
             </button>
           `).join('')}
         </div>
@@ -224,6 +228,7 @@ export function renderHome(app, onStartSession) {
 
   // Quick start button
   document.getElementById('quick-start-btn').addEventListener('click', () => {
+    ttsService.unlock();
     if (!userStore.getApiKey()) {
       document.getElementById('api-key-modal').classList.remove('hidden');
     } else {
@@ -238,6 +243,7 @@ export function renderHome(app, onStartSession) {
 
   // Challenge button
   document.getElementById('challenge-btn')?.addEventListener('click', () => {
+    ttsService.unlock();
     if (!userStore.getApiKey()) {
       document.getElementById('api-key-modal').classList.remove('hidden');
     } else {
@@ -251,6 +257,7 @@ export function renderHome(app, onStartSession) {
   });
 
   document.getElementById('modal-save-btn')?.addEventListener('click', () => {
+    ttsService.unlock();
     const apiKey = document.getElementById('api-key-input').value.trim();
     const userName = document.getElementById('user-name-input').value.trim();
     if (apiKey) {

@@ -13,10 +13,23 @@ class TTSService {
     this.onStart = null;
     this.onEnd = null;
     this.onWord = null;
-    this.rate = 1.0;
+    this.rate = 1.05;
     this.pitch = 1.0;
     this.volume = 1.0;
     this._voicesLoaded = false;
+  }
+
+  /** Unlock audio context for mobile browsers */
+  unlock() {
+    if (!this.synth) return;
+    try {
+      const silentUtterance = new SpeechSynthesisUtterance('');
+      silentUtterance.volume = 0;
+      this.synth.speak(silentUtterance);
+      console.log('SpeechSynthesis unlocked for mobile');
+    } catch (e) {
+      console.warn('Silent utterance unlock failed:', e);
+    }
   }
 
   /** Initialize and select best American voice */
@@ -27,6 +40,18 @@ class TTSService {
         if (voices.length === 0) return;
 
         this._voicesLoaded = true;
+
+        // Check if there is a saved voice preferred by the user
+        const savedVoiceName = localStorage.getItem('pm_tts_voice');
+        if (savedVoiceName) {
+          const match = voices.find(v => v.name === savedVoiceName);
+          if (match) {
+            this.voice = match;
+            console.log('Selected saved TTS voice:', match.name, match.lang);
+            resolve(true);
+            return;
+          }
+        }
 
         // Priority: Find the most natural American voice possible (Neural/Cloud > Desktop)
         const priorities = [
@@ -168,7 +193,10 @@ class TTSService {
   setVoice(voiceName) {
     const voices = this.synth?.getVoices() || [];
     const match = voices.find(v => v.name === voiceName);
-    if (match) this.voice = match;
+    if (match) {
+      this.voice = match;
+      localStorage.setItem('pm_tts_voice', voiceName);
+    }
   }
 
   /** Check if TTS is supported */
